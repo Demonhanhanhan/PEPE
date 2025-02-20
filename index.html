@@ -463,35 +463,70 @@
             <textarea id="role-text" placeholder="交互：yuliayuan&#10;视觉：edwinawu&#10;开发：janjin,demaoma&#10;测试：v_vvjwwang"></textarea>
         </div>
 
-        <div class="button-group">
-            <button class="copy-button" onclick="parseRoles()">识别</button>
-            <button class="copy-button" onclick="copyRoles()">复制</button>
-            <button class="copy-button history-button" onclick="showHistory('role')">查看历史</button>
+        <!-- iOS 组 -->
+        <div class="form-group" style="margin-top: 20px;">
+            <h3 style="margin-bottom: 15px;">iOS</h3>
+            <div class="button-group" style="margin-bottom: 15px;">
+                <button class="copy-button" onclick="parseRolesForGroup('ios')">识别 iOS</button>
+                <button class="copy-button" onclick="copyRolesForGroup('ios')">复制 iOS</button>
+            </div>
+            <div id="ios-roles">
+                <div class="form-group">
+                    <label>算法:</label>
+                    <input type="text" id="ios-algorithm-rtx">
+                </div>
+                <div class="form-group">
+                    <label>开发:</label>
+                    <input type="text" id="ios-dev-rtx">
+                </div>
+                <div class="form-group">
+                    <label>测试:</label>
+                    <input type="text" id="ios-test-rtx">
+                </div>
+                <div class="form-group">
+                    <label>交互:</label>
+                    <input type="text" id="ios-interaction-rtx">
+                </div>
+                <div class="form-group">
+                    <label>视觉:</label>
+                    <input type="text" id="ios-design-rtx">
+                </div>
+            </div>
         </div>
-        <div id="role-success" class="success-message">复制成功！</div>
 
-        <div id="parsed-roles" style="margin-top: 20px;">
-            <div class="form-group">
-                <label>算法:</label>
-                <input type="text" id="algorithm-rtx">
+        <!-- Android 组 -->
+        <div class="form-group" style="margin-top: 30px;">
+            <h3 style="margin-bottom: 15px;">Android</h3>
+            <div class="button-group" style="margin-bottom: 15px;">
+                <button class="copy-button" onclick="parseRolesForGroup('android')">识别 Android</button>
+                <button class="copy-button" onclick="copyRolesForGroup('android')">复制 Android</button>
             </div>
-            <div class="form-group">
-                <label>开发:</label>
-                <input type="text" id="dev-rtx">
-            </div>
-            <div class="form-group">
-                <label>测试:</label>
-                <input type="text" id="test-rtx">
-            </div>
-            <div class="form-group">
-                <label>交互:</label>
-                <input type="text" id="interaction-rtx">
-            </div>
-            <div class="form-group">
-                <label>视觉:</label>
-                <input type="text" id="design-rtx">
+            <div id="android-roles">
+                <div class="form-group">
+                    <label>算法:</label>
+                    <input type="text" id="android-algorithm-rtx">
+                </div>
+                <div class="form-group">
+                    <label>开发:</label>
+                    <input type="text" id="android-dev-rtx">
+                </div>
+                <div class="form-group">
+                    <label>测试:</label>
+                    <input type="text" id="android-test-rtx">
+                </div>
+                <div class="form-group">
+                    <label>交互:</label>
+                    <input type="text" id="android-interaction-rtx">
+                </div>
+                <div class="form-group">
+                    <label>视觉:</label>
+                    <input type="text" id="android-design-rtx">
+                </div>
             </div>
         </div>
+
+        <button class="copy-button history-button" onclick="showHistory('role')" style="margin-top: 20px;">查看历史</button>
+        <div id="role-success" class="success-message">复制成功！</div>
     </div>
 
     <script>
@@ -520,11 +555,11 @@
                     kernelPlatform: document.getElementById('tracking-kernel-platform').value,
                 },
                 role: {
-                    algorithmRtx: document.getElementById('algorithm-rtx').value,
-                    devRtx: document.getElementById('dev-rtx').value,
-                    testRtx: document.getElementById('test-rtx').value,
-                    interactionRtx: document.getElementById('interaction-rtx').value,
-                    designRtx: document.getElementById('design-rtx').value,
+                    algorithmRtx: document.getElementById('ios-algorithm-rtx').value,
+                    devRtx: document.getElementById('ios-dev-rtx').value,
+                    testRtx: document.getElementById('ios-test-rtx').value,
+                    interactionRtx: document.getElementById('ios-interaction-rtx').value,
+                    designRtx: document.getElementById('ios-design-rtx').value,
                 }
             };
             localStorage.setItem('mfHelperData', JSON.stringify(formData));
@@ -574,11 +609,11 @@
                 
                 // 角色标签页
                 if (formData.role) {
-                    document.getElementById('algorithm-rtx').value = formData.role.algorithmRtx || '';
-                    document.getElementById('dev-rtx').value = formData.role.devRtx || '';
-                    document.getElementById('test-rtx').value = formData.role.testRtx || '';
-                    document.getElementById('interaction-rtx').value = formData.role.interactionRtx || '';
-                    document.getElementById('design-rtx').value = formData.role.designRtx || '';
+                    document.getElementById('ios-algorithm-rtx').value = formData.role.algorithmRtx || '';
+                    document.getElementById('ios-dev-rtx').value = formData.role.devRtx || '';
+                    document.getElementById('ios-test-rtx').value = formData.role.testRtx || '';
+                    document.getElementById('ios-interaction-rtx').value = formData.role.interactionRtx || '';
+                    document.getElementById('ios-design-rtx').value = formData.role.designRtx || '';
                 }
             }
         }
@@ -757,11 +792,10 @@
             });
         }
 
-        // 解析角色信息
-        function parseRoles() {
+        // 修改解析角色信息的函数
+        function parseRolesForGroup(group) {
             const text = document.getElementById('role-text').value.trim();
             
-            // 添加输入验证
             if (!text) {
                 alert('没有内容');
                 return;
@@ -769,19 +803,18 @@
             
             const lines = text.split('\n');
             
-            // 清空所有角色字段
-            document.getElementById('algorithm-rtx').value = '';
-            document.getElementById('dev-rtx').value = '';
-            document.getElementById('test-rtx').value = '';
-            document.getElementById('interaction-rtx').value = '';
-            document.getElementById('design-rtx').value = '';
+            // 清空指定组的所有角色字段
+            const roles = ['algorithm', 'dev', 'test', 'interaction', 'design'];
+            roles.forEach(role => {
+                document.getElementById(`${group}-${role}-rtx`).value = '';
+            });
             
             const roleMap = {
-                '算法': 'algorithm-rtx',
-                '开发': 'dev-rtx',
-                '测试': 'test-rtx',
-                '交互': 'interaction-rtx',
-                '视觉': 'design-rtx'
+                '算法': `${group}-algorithm-rtx`,
+                '开发': `${group}-dev-rtx`,
+                '测试': `${group}-test-rtx`,
+                '交互': `${group}-interaction-rtx`,
+                '视觉': `${group}-design-rtx`
             };
             
             lines.forEach(line => {
@@ -803,17 +836,16 @@
             saveToLocalStorage();
         }
 
-        // 复制角色信息
-        function copyRoles() {
+        // 修改复制角色信息的函数
+        function copyRolesForGroup(group) {
             const roleMap = {
-                '算法': 'algorithm-rtx',
-                '开发': 'dev-rtx',
-                '测试': 'test-rtx',
-                '交互': 'interaction-rtx',
-                '视觉': 'design-rtx'
+                '算法': `${group}-algorithm-rtx`,
+                '开发': `${group}-dev-rtx`,
+                '测试': `${group}-test-rtx`,
+                '交互': `${group}-interaction-rtx`,
+                '视觉': `${group}-design-rtx`
             };
             
-            // 构建复制文本
             const copyLines = [];
             for (const [role, elementId] of Object.entries(roleMap)) {
                 const value = document.getElementById(elementId).value;
