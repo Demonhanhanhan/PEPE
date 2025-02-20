@@ -2,7 +2,7 @@
 <html lang="zh">
 <head>
     <meta charset="UTF-8">
-    <title>MF文案助手</title>
+    <title>Fiber-MF文案助手</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
@@ -231,7 +231,7 @@
     </style>
 </head>
 <body>
-    <h1>MF文案助手</h1>
+    <h1>Fiber-MF文案助手</h1>
     
     <div class="tab-buttons">
         <button class="tab-button active" onclick="showTab('feature')">功能</button>
@@ -470,6 +470,7 @@
                 <button class="copy-button" onclick="parseRolesForGroup('ios')">识别 iOS</button>
                 <button class="copy-button" onclick="copyRolesForGroup('ios')">复制 iOS</button>
             </div>
+            <div id="ios-success" class="success-message">复制成功！</div>
             <div id="ios-roles">
                 <div class="form-group">
                     <label>算法:</label>
@@ -501,6 +502,7 @@
                 <button class="copy-button" onclick="parseRolesForGroup('android')">识别 Android</button>
                 <button class="copy-button" onclick="copyRolesForGroup('android')">复制 Android</button>
             </div>
+            <div id="android-success" class="success-message">复制成功！</div>
             <div id="android-roles">
                 <div class="form-group">
                     <label>算法:</label>
@@ -547,6 +549,7 @@
                     kernelPlatform: document.getElementById('kernel-platform').value,
                 },
                 tracking: {
+                    trackName: document.getElementById('trackName').value,
                     platform: document.getElementById('tracking-platform').value,
                     targetType: document.getElementById('tracking-target-type').value,
                     userExp: document.querySelector('input[name="tracking-user-exp"]:checked')?.value,
@@ -555,11 +558,20 @@
                     kernelPlatform: document.getElementById('tracking-kernel-platform').value,
                 },
                 role: {
-                    algorithmRtx: document.getElementById('ios-algorithm-rtx').value,
-                    devRtx: document.getElementById('ios-dev-rtx').value,
-                    testRtx: document.getElementById('ios-test-rtx').value,
-                    interactionRtx: document.getElementById('ios-interaction-rtx').value,
-                    designRtx: document.getElementById('ios-design-rtx').value,
+                    ios: {
+                        algorithm: document.getElementById('ios-algorithm-rtx').value,
+                        dev: document.getElementById('ios-dev-rtx').value,
+                        test: document.getElementById('ios-test-rtx').value,
+                        interaction: document.getElementById('ios-interaction-rtx').value,
+                        design: document.getElementById('ios-design-rtx').value
+                    },
+                    android: {
+                        algorithm: document.getElementById('android-algorithm-rtx').value,
+                        dev: document.getElementById('android-dev-rtx').value,
+                        test: document.getElementById('android-test-rtx').value,
+                        interaction: document.getElementById('android-interaction-rtx').value,
+                        design: document.getElementById('android-design-rtx').value
+                    }
                 }
             };
             localStorage.setItem('mfHelperData', JSON.stringify(formData));
@@ -595,6 +607,7 @@
                 
                 // 埋点标签页
                 if (formData.tracking) {
+                    document.getElementById('trackName').value = formData.tracking.trackName || '';
                     document.getElementById('tracking-platform').value = formData.tracking.platform || '';
                     document.getElementById('tracking-target-type').value = formData.tracking.targetType || '';
                     if (formData.tracking.userExp) {
@@ -609,11 +622,20 @@
                 
                 // 角色标签页
                 if (formData.role) {
-                    document.getElementById('ios-algorithm-rtx').value = formData.role.algorithmRtx || '';
-                    document.getElementById('ios-dev-rtx').value = formData.role.devRtx || '';
-                    document.getElementById('ios-test-rtx').value = formData.role.testRtx || '';
-                    document.getElementById('ios-interaction-rtx').value = formData.role.interactionRtx || '';
-                    document.getElementById('ios-design-rtx').value = formData.role.designRtx || '';
+                    if (formData.role.ios) {
+                        document.getElementById('ios-algorithm-rtx').value = formData.role.ios.algorithm || '';
+                        document.getElementById('ios-dev-rtx').value = formData.role.ios.dev || '';
+                        document.getElementById('ios-test-rtx').value = formData.role.ios.test || '';
+                        document.getElementById('ios-interaction-rtx').value = formData.role.ios.interaction || '';
+                        document.getElementById('ios-design-rtx').value = formData.role.ios.design || '';
+                    }
+                    if (formData.role.android) {
+                        document.getElementById('android-algorithm-rtx').value = formData.role.android.algorithm || '';
+                        document.getElementById('android-dev-rtx').value = formData.role.android.dev || '';
+                        document.getElementById('android-test-rtx').value = formData.role.android.test || '';
+                        document.getElementById('android-interaction-rtx').value = formData.role.android.interaction || '';
+                        document.getElementById('android-design-rtx').value = formData.role.android.design || '';
+                    }
                 }
             }
         }
@@ -763,6 +785,7 @@
 
         // 复制埋点内容
         function copyTrackingContent() {
+            const trackName = document.getElementById('trackName').value;
             const platform = document.getElementById('tracking-platform').value;
             const targetType = document.getElementById('tracking-target-type').value;
             const userExp = document.querySelector('input[name="tracking-user-exp"]:checked')?.value;
@@ -770,7 +793,7 @@
             const dependentMf = document.getElementById('tracking-dependent-mf').value;
             const kernelPlatform = document.getElementById('tracking-kernel-platform').value;
 
-            let text = `端：${platform}\n需求类型：灯塔埋点需求\n是否实验需求：否\n免实验原因：埋点不需要实验\n目标类型：${targetType}`;
+            let text = `埋点名称：${trackName}\n端：${platform}\n需求类型：灯塔埋点需求\n是否实验需求：否\n免实验原因：埋点不需要实验\n目标类型：${targetType}`;
 
             if (userExp) {
                 text += `\n用户体验评测：${userExp}`;
@@ -832,7 +855,7 @@
                 }
             });
             
-            showSuccess('role-success');
+            showSuccess(`${group}-success`);
             saveToLocalStorage();
         }
 
@@ -855,11 +878,15 @@
             }
             
             const copyText = copyLines.join('\n');
-            navigator.clipboard.writeText(copyText).then(() => {
-                showSuccess('role-success');
-                saveToLocalStorage();
-                saveToHistory('role', copyText);
-            });
+            if (copyText) {
+                navigator.clipboard.writeText(copyText).then(() => {
+                    showSuccess(`${group}-success`);
+                    saveToLocalStorage();  // 保存当前状态到草稿
+                    saveToHistory('role', copyText);
+                });
+            } else {
+                alert('没有可复制的内容');
+            }
         }
 
         // 添加显示历史记录的函数
