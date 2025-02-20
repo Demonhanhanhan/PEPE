@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>MF文案助手</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            max-width: 800px;
+            margin: 10px auto;
+            padding: 0 20px;
+            background-color: #f5f5f7;
+            color: #1d1d1f;
+        }
+        h1 {
+            font-size: 24px;
+            font-weight: 500;
+            text-align: center;
+            margin: 10px 0;
+        }
+        .tab {
+            display: none;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .tab-buttons {
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            background: rgba(0,0,0,0.05);
+            padding: 6px;
+            border-radius: 10px;
+            width: fit-content;
+            margin: 10px auto;
+        }
+        .tab-button {
+            padding: 10px 20px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+        .tab-button.active {
+            background: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            color: #007AFF;
+        }
+        .form-group {
+            margin-bottom: 12px;
+            animation: fadeIn 0.3s ease;
+        }
+        label {
+            display: block;
+            margin-bottom: 4px;
+            font-size: 14px;
+            color: #666;
+        }
+        input[type="text"], select, textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            background: #f5f5f7;
+        }
+        input[type="text"]:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #007AFF;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(0,122,255,0.1);
+        }
+        .radio-group {
+            display: flex;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        .radio-button {
+            position: relative;
+            display: inline-block;
+        }
+        .radio-button input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .radio-button label {
+            display: inline-block;
+            padding: 6px 12px;
+            background: #f5f5f7;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            color: #1d1d1f;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+            margin: 0;
+        }
+        .radio-button input[type="radio"]:checked + label {
+            background: #007AFF;
+            color: white;
+            box-shadow: 0 2px 5px rgba(0,122,255,0.2);
+        }
+        .radio-button input[type="radio"]:not(:checked) + label:hover {
+            background: #e5e5ea;
+        }
+        .radio-button input[type="radio"]:focus + label {
+            box-shadow: 0 0 0 2px rgba(0,122,255,0.3);
+        }
+        .copy-button {
+            background: #007AFF;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 10px;
+            transition: all 0.2s ease;
+            font-weight: 500;
+        }
+        .copy-button:hover {
+            background: #0051D5;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .copy-button:active {
+            transform: translateY(0);
+            box-shadow: none;
+        }
+        .success-message {
+            color: #34C759;
+            display: none;
+            margin-top: 10px;
+            text-align: center;
+            font-size: 14px;
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .history-modal {
+            background: rgba(0,0,0,0.5) !important;
+            backdrop-filter: blur(5px);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .history-content {
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            max-width: 80%;
+            max-height: 80vh;
+            overflow-y: auto;
+            animation: modalFadeIn 0.3s ease;
+        }
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .tab.active {
+            display: block;
+        }
+        .form-container {
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .history-button {
+            background: #4CAF50 !important;
+        }
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            .tab {
+                padding: 15px;
+            }
+            .button-group {
+                flex-direction: column;
+            }
+            .copy-button {
+                width: 100%;
+            }
+        }
+        .form-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 12px;
+        }
+        .form-col {
+            flex: 1;
+        }
+    </style>
+</head>
+<body>
+    <h1>MF文案助手</h1>
+    
+    <div class="tab-buttons">
+        <button class="tab-button active" onclick="showTab('feature')">功能</button>
+        <button class="tab-button" onclick="showTab('tracking')">埋点</button>
+        <button class="tab-button" onclick="showTab('role')">角色</button>
+    </div>
+
+    <div id="feature" class="tab active">
+        <div class="form-row">
+            <div class="form-col">
+                <div class="form-group">
+                    <label>MF名称:</label>
+                    <input type="text" id="mf-name">
+                </div>
+            </div>
+            <div class="form-col">
+                <div class="form-group">
+                    <label>端:</label>
+                    <select id="platform">
+                        <option value="Android">Android</option>
+                        <option value="iOS">iOS</option>
+                        <option value="PC">PC</option>
+                        <option value="移动双端">移动双端</option>
+                        <option value="端内核">端内核</option>
+                        <option value="云内核">云内核</option>
+                        <option value="端云内核">端云内核</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>需求类型:</label>
+            <select id="req-type">
+                <option value="产品需求">产品需求</option>
+                <option value="灯塔埋点需求">灯塔埋点需求</option>
+                <option value="技术需求">技术需求</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>是否实验需求:</label>
+            <div class="radio-group">
+                <div class="radio-button">
+                    <input type="radio" id="exp-yes" name="is-experiment" value="是" onchange="toggleExpFields()">
+                    <label for="exp-yes">是</label>
+                </div>
+                <div class="radio-button">
+                    <input type="radio" id="exp-no" name="is-experiment" value="否" onchange="toggleExpFields()" checked>
+                    <label for="exp-no">否</label>
+                </div>
+            </div>
+        </div>
+
+        <div id="exp-method-group" class="form-group" style="display: none;">
+            <label>实验方式:</label>
+            <select id="exp-method">
+                <option value="TAB">TAB</option>
+                <option value="独立版本">独立版本</option>
+                <option value="热修">热修</option>
+                <option value="热修+TAB">热修+TAB</option>
+            </select>
+        </div>
+
+        <div id="no-exp-reason-group" class="form-group" style="display: none;">
+            <label>免实验原因:</label>
+            <input type="text" id="no-exp-reason">
+        </div>
+
+        <div class="form-group">
+            <label>目标类型:</label>
+            <select id="target-type">
+                <option value="用增">用增</option>
+                <option value="商增">商增</option>
+                <option value="用户体验">用户体验</option>
+                <option value="bug">bug</option>
+                <option value="底线">底线</option>
+                <option value="其他">其他</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>用户体验评测:</label>
+            <div class="radio-group">
+                <div class="radio-button">
+                    <input type="radio" id="user-exp-yes" name="user-exp" value="是">
+                    <label for="user-exp-yes">是</label>
+                </div>
+                <div class="radio-button">
+                    <input type="radio" id="user-exp-no" name="user-exp" value="否" checked>
+                    <label for="user-exp-no">否</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>上报敏感数据:</label>
+            <div class="radio-group">
+                <div class="radio-button">
+                    <input type="radio" id="sensitive-yes" name="sensitive-data" value="是">
+                    <label for="sensitive-yes">是</label>
+                </div>
+                <div class="radio-button">
+                    <input type="radio" id="sensitive-no" name="sensitive-data" value="否" checked>
+                    <label for="sensitive-no">否</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>依赖的MF:</label>
+            <input type="text" id="dependent-mf" placeholder="可空白，不会复制该字段">
+        </div>
+
+        <div class="form-group">
+            <label>内核需求关联平台:</label>
+            <select id="kernel-platform">
+                <option value="不需要">不需要</option>
+                <option value="Android">Android</option>
+                <option value="iOS">iOS</option>
+                <option value="PC">PC</option>
+                <option value="MAC">MAC</option>
+            </select>
+        </div>
+
+        <div class="button-group">
+            <button class="copy-button" onclick="copyFeatureContent()">复制到剪贴板</button>
+            <button class="copy-button history-button" onclick="showHistory('feature')">查看历史</button>
+        </div>
+        <div id="feature-success" class="success-message">复制成功！</div>
+    </div>
+
+    <div id="tracking" class="tab">
+        <div class="form-group">
+            <label>端:</label>
+            <select id="tracking-platform">
+                <option value="Android">Android</option>
+                <option value="iOS">iOS</option>
+                <option value="PC">PC</option>
+                <option value="移动双端">移动双端</option>
+                <option value="端内核">端内核</option>
+                <option value="云内核">云内核</option>
+                <option value="端云内核">端云内核</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>需求类型: 灯塔埋点需求</label>
+        </div>
+
+        <div class="form-group">
+            <label>是否实验需求: 否</label>
+        </div>
+
+        <div class="form-group">
+            <label>免实验原因: 埋点不需要实验</label>
+        </div>
+
+        <div class="form-group">
+            <label>目标类型:</label>
+            <select id="tracking-target-type">
+                <option value="其他" selected>其他</option>
+                <option value="用增">用增</option>
+                <option value="商增">商增</option>
+                <option value="用户体验">用户体验</option>
+                <option value="bug">bug</option>
+                <option value="底线">底线</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>用户体验评测:</label>
+            <div class="radio-group">
+                <div class="radio-button">
+                    <input type="radio" id="tracking-user-exp-yes" name="tracking-user-exp" value="是">
+                    <label for="tracking-user-exp-yes">是</label>
+                </div>
+                <div class="radio-button">
+                    <input type="radio" id="tracking-user-exp-no" name="tracking-user-exp" value="否" checked>
+                    <label for="tracking-user-exp-no">否</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>上报敏感数据:</label>
+            <div class="radio-group">
+                <div class="radio-button">
+                    <input type="radio" id="tracking-sensitive-yes" name="tracking-sensitive-data" value="是">
+                    <label for="tracking-sensitive-yes">是</label>
+                </div>
+                <div class="radio-button">
+                    <input type="radio" id="tracking-sensitive-no" name="tracking-sensitive-data" value="否" checked>
+                    <label for="tracking-sensitive-no">否</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>依赖的MF:</label>
+            <input type="text" id="tracking-dependent-mf" placeholder="可空白，不会复制该字段">
+        </div>
+
+        <div class="form-group">
+            <label>内核需求关联平台:</label>
+            <select id="tracking-kernel-platform">
+                <option value="不需要" selected>不需要</option>
+                <option value="Android">Android</option>
+                <option value="iOS">iOS</option>
+                <option value="PC">PC</option>
+                <option value="MAC">MAC</option>
+            </select>
+        </div>
+
+        <div class="button-group">
+            <button class="copy-button" onclick="copyTrackingContent()">复制到剪贴板</button>
+            <button class="copy-button history-button" onclick="showHistory('tracking')">查看历史</button>
+        </div>
+        <div id="tracking-success" class="success-message">复制成功！</div>
+    </div>
+
+    <div id="role" class="tab">
+        <div class="form-group">
+            <label>粘贴文本:</label>
+            <textarea id="role-text" placeholder="交互：yuliayuan&#10;视觉：edwinawu&#10;开发：janjin,demaoma&#10;测试：v_vvjwwang"></textarea>
+        </div>
+
+        <div class="button-group">
+            <button class="copy-button" onclick="parseRoles()">识别</button>
+            <button class="copy-button" onclick="copyRoles()">复制</button>
+            <button class="copy-button history-button" onclick="showHistory('role')">查看历史</button>
+        </div>
+        <div id="role-success" class="success-message">复制成功！</div>
+
+        <div id="parsed-roles" style="margin-top: 20px;">
+            <div class="form-group">
+                <label>算法:</label>
+                <input type="text" id="algorithm-rtx">
+            </div>
+            <div class="form-group">
+                <label>开发:</label>
+                <input type="text" id="dev-rtx">
+            </div>
+            <div class="form-group">
+                <label>测试:</label>
+                <input type="text" id="test-rtx">
+            </div>
+            <div class="form-group">
+                <label>交互:</label>
+                <input type="text" id="interaction-rtx">
+            </div>
+            <div class="form-group">
+                <label>视觉:</label>
+                <input type="text" id="design-rtx">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 保存表单数据到localStorage
+        function saveToLocalStorage() {
+            const formData = {
+                feature: {
+                    mfName: document.getElementById('mf-name').value,
+                    platform: document.getElementById('platform').value,
+                    reqType: document.getElementById('req-type').value,
+                    isExperiment: document.querySelector('input[name="is-experiment"]:checked')?.value,
+                    expMethod: document.getElementById('exp-method').value,
+                    noExpReason: document.getElementById('no-exp-reason').value,
+                    targetType: document.getElementById('target-type').value,
+                    userExp: document.querySelector('input[name="user-exp"]:checked')?.value,
+                    sensitiveData: document.querySelector('input[name="sensitive-data"]:checked')?.value,
+                    dependentMf: document.getElementById('dependent-mf').value,
+                    kernelPlatform: document.getElementById('kernel-platform').value,
+                },
+                tracking: {
+                    platform: document.getElementById('tracking-platform').value,
+                    targetType: document.getElementById('tracking-target-type').value,
+                    userExp: document.querySelector('input[name="tracking-user-exp"]:checked')?.value,
+                    sensitiveData: document.querySelector('input[name="tracking-sensitive-data"]:checked')?.value,
+                    dependentMf: document.getElementById('tracking-dependent-mf').value,
+                    kernelPlatform: document.getElementById('tracking-kernel-platform').value,
+                },
+                role: {
+                    algorithmRtx: document.getElementById('algorithm-rtx').value,
+                    devRtx: document.getElementById('dev-rtx').value,
+                    testRtx: document.getElementById('test-rtx').value,
+                    interactionRtx: document.getElementById('interaction-rtx').value,
+                    designRtx: document.getElementById('design-rtx').value,
+                }
+            };
+            localStorage.setItem('mfHelperData', JSON.stringify(formData));
+        }
+
+        // 从localStorage加载表单数据
+        function loadFromLocalStorage() {
+            const savedData = localStorage.getItem('mfHelperData');
+            if (savedData) {
+                const formData = JSON.parse(savedData);
+                
+                // 功能标签页
+                if (formData.feature) {
+                    document.getElementById('mf-name').value = formData.feature.mfName || '';
+                    document.getElementById('platform').value = formData.feature.platform || '';
+                    document.getElementById('req-type').value = formData.feature.reqType || '';
+                    if (formData.feature.isExperiment) {
+                        document.querySelector(`input[name="is-experiment"][value="${formData.feature.isExperiment}"]`).checked = true;
+                        toggleExpFields();
+                    }
+                    document.getElementById('exp-method').value = formData.feature.expMethod || '';
+                    document.getElementById('no-exp-reason').value = formData.feature.noExpReason || '';
+                    document.getElementById('target-type').value = formData.feature.targetType || '';
+                    if (formData.feature.userExp) {
+                        document.querySelector(`input[name="user-exp"][value="${formData.feature.userExp}"]`).checked = true;
+                    }
+                    if (formData.feature.sensitiveData) {
+                        document.querySelector(`input[name="sensitive-data"][value="${formData.feature.sensitiveData}"]`).checked = true;
+                    }
+                    document.getElementById('dependent-mf').value = formData.feature.dependentMf || '';
+                    document.getElementById('kernel-platform').value = formData.feature.kernelPlatform || '';
+                }
+                
+                // 埋点标签页
+                if (formData.tracking) {
+                    document.getElementById('tracking-platform').value = formData.tracking.platform || '';
+                    document.getElementById('tracking-target-type').value = formData.tracking.targetType || '';
+                    if (formData.tracking.userExp) {
+                        document.querySelector(`input[name="tracking-user-exp"][value="${formData.tracking.userExp}"]`).checked = true;
+                    }
+                    if (formData.tracking.sensitiveData) {
+                        document.querySelector(`input[name="tracking-sensitive-data"][value="${formData.tracking.sensitiveData}"]`).checked = true;
+                    }
+                    document.getElementById('tracking-dependent-mf').value = formData.tracking.dependentMf || '';
+                    document.getElementById('tracking-kernel-platform').value = formData.tracking.kernelPlatform || '';
+                }
+                
+                // 角色标签页
+                if (formData.role) {
+                    document.getElementById('algorithm-rtx').value = formData.role.algorithmRtx || '';
+                    document.getElementById('dev-rtx').value = formData.role.devRtx || '';
+                    document.getElementById('test-rtx').value = formData.role.testRtx || '';
+                    document.getElementById('interaction-rtx').value = formData.role.interactionRtx || '';
+                    document.getElementById('design-rtx').value = formData.role.designRtx || '';
+                }
+            }
+        }
+
+        // 显示成功消息
+        function showSuccess(elementId) {
+            const element = document.getElementById(elementId);
+            element.style.display = 'block';
+            setTimeout(() => {
+                element.style.display = 'none';
+            }, 2000);
+        }
+
+        // 修改标签页切换函数
+        function showTab(tabName) {
+            // 先隐藏所有标签页
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.style.display = 'none';
+                tab.classList.remove('active');
+            });
+            
+            // 移除所有按钮的活动状态
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.classList.remove('active');
+            });
+            
+            // 显示选中的标签页
+            const selectedTab = document.getElementById(tabName);
+            if (selectedTab) {
+                selectedTab.style.display = 'block';
+                selectedTab.classList.add('active');
+            }
+            
+            // 激活对应的按钮
+            const selectedButton = document.querySelector(`button[onclick="showTab('${tabName}')"]`);
+            if (selectedButton) {
+                selectedButton.classList.add('active');
+            }
+        }
+
+        // 修改切换实验字段显示的函数
+        function toggleExpFields() {
+            const isExperiment = document.querySelector('input[name="is-experiment"]:checked')?.value;
+            const expMethodGroup = document.getElementById('exp-method-group');
+            const noExpReasonGroup = document.getElementById('no-exp-reason-group');
+            
+            if (isExperiment === '是') {
+                expMethodGroup.style.display = 'block';
+                noExpReasonGroup.style.display = 'none';
+            } else if (isExperiment === '否') {
+                expMethodGroup.style.display = 'none';
+                noExpReasonGroup.style.display = 'block';
+            } else {
+                expMethodGroup.style.display = 'none';
+                noExpReasonGroup.style.display = 'none';
+            }
+        }
+
+        // 定义历史记录最大数量
+        const MAX_HISTORY = 10;
+
+        // 保存到历史记录
+        function saveToHistory(type, content) {
+            try {
+                // 获取现有历史记录
+                let history = JSON.parse(localStorage.getItem('mfHelperHistory') || '{}');
+                
+                // 初始化对应类型的历史记录数组
+                if (!history[type]) {
+                    history[type] = [];
+                }
+                
+                // 添加新记录（带时间戳）
+                const newRecord = {
+                    content: content,
+                    timestamp: new Date().toLocaleString()
+                };
+                
+                // 将新记录添加到数组开头
+                history[type].unshift(newRecord);
+                
+                // 限制历史记录数量
+                if (history[type].length > MAX_HISTORY) {
+                    history[type] = history[type].slice(0, MAX_HISTORY);
+                }
+                
+                // 保存回 localStorage
+                localStorage.setItem('mfHelperHistory', JSON.stringify(history));
+            } catch (e) {
+                console.error('保存历史记录失败:', e);
+            }
+        }
+
+        // 添加错误处理函数
+        function handleError(error, context) {
+            console.error(`Error in ${context}:`, error);
+            alert(`操作失败: ${error.message}`);
+        }
+
+        // 修改复制函数
+        function copyFeatureContent() {
+            try {
+                const mfName = document.getElementById('mf-name').value;
+                const platform = document.getElementById('platform').value;
+                const reqType = document.getElementById('req-type').value;
+                const isExperiment = document.querySelector('input[name="is-experiment"]:checked')?.value;
+                const expMethod = document.getElementById('exp-method').value;
+                const noExpReason = document.getElementById('no-exp-reason').value;
+                const targetType = document.getElementById('target-type').value;
+                const userExp = document.querySelector('input[name="user-exp"]:checked')?.value;
+                const sensitiveData = document.querySelector('input[name="sensitive-data"]:checked')?.value;
+                const dependentMf = document.getElementById('dependent-mf').value;
+                const kernelPlatform = document.getElementById('kernel-platform').value;
+
+                let text = `MF名称：${mfName}\n端：${platform}\n需求类型：${reqType}\n是否实验需求：${isExperiment}`;
+                
+                if (isExperiment === '是') {
+                    text += `\n实验方式：${expMethod}`;
+                } else {
+                    text += `\n免实验原因：${noExpReason}`;
+                }
+
+                text += `\n目标类型：${targetType}`;
+
+                if (userExp) {
+                    text += `\n用户体验评测：${userExp}`;
+                }
+                if (sensitiveData) {
+                    text += `\n上报敏感数据（见备注）：${sensitiveData}`;
+                }
+                if (dependentMf && dependentMf !== "可空白，不会复制该字段") {
+                    text += `\n依赖的MF：${dependentMf}`;
+                }
+                if (kernelPlatform && kernelPlatform !== "不需要") {
+                    text += `\n内核需求关联平台：${kernelPlatform}`;
+                }
+
+                navigator.clipboard.writeText(text).then(() => {
+                    showSuccess('feature-success');
+                    saveToLocalStorage();
+                    saveToHistory('feature', text);
+                });
+            } catch (error) {
+                handleError(error, 'copyFeatureContent');
+            }
+        }
+
+        // 复制埋点内容
+        function copyTrackingContent() {
+            const platform = document.getElementById('tracking-platform').value;
+            const targetType = document.getElementById('tracking-target-type').value;
+            const userExp = document.querySelector('input[name="tracking-user-exp"]:checked')?.value;
+            const sensitiveData = document.querySelector('input[name="tracking-sensitive-data"]:checked')?.value;
+            const dependentMf = document.getElementById('tracking-dependent-mf').value;
+            const kernelPlatform = document.getElementById('tracking-kernel-platform').value;
+
+            let text = `端：${platform}\n需求类型：灯塔埋点需求\n是否实验需求：否\n免实验原因：埋点不需要实验\n目标类型：${targetType}`;
+
+            if (userExp) {
+                text += `\n用户体验评测：${userExp}`;
+            }
+            if (sensitiveData) {
+                text += `\n上报敏感数据（见备注）：${sensitiveData}`;
+            }
+            if (dependentMf && dependentMf !== "可空白，不会复制该字段") {
+                text += `\n依赖的MF：${dependentMf}`;
+            }
+            if (kernelPlatform && kernelPlatform !== "不需要") {
+                text += `\n内核需求关联平台：${kernelPlatform}`;
+            }
+
+            navigator.clipboard.writeText(text).then(() => {
+                showSuccess('tracking-success');
+                saveToLocalStorage();
+                saveToHistory('tracking', text);
+            });
+        }
+
+        // 解析角色信息
+        function parseRoles() {
+            const text = document.getElementById('role-text').value;
+            const lines = text.split('\n');
+            
+            // 清空所有角色字段
+            document.getElementById('algorithm-rtx').value = '';
+            document.getElementById('dev-rtx').value = '';
+            document.getElementById('test-rtx').value = '';
+            document.getElementById('interaction-rtx').value = '';
+            document.getElementById('design-rtx').value = '';
+            
+            const roleMap = {
+                '算法': 'algorithm-rtx',
+                '开发': 'dev-rtx',
+                '测试': 'test-rtx',
+                '交互': 'interaction-rtx',
+                '视觉': 'design-rtx'
+            };
+            
+            lines.forEach(line => {
+                line = line.trim();
+                if (!line || line === "@Fiber流程助手") return;
+                
+                for (const [role, elementId] of Object.entries(roleMap)) {
+                    if (line.startsWith(`${role}：`) || line.startsWith(`${role}:`)) {
+                        const value = line.includes('：') ? 
+                            line.split('：')[1].trim() : 
+                            line.split(':')[1].trim();
+                        document.getElementById(elementId).value = value;
+                        break;
+                    }
+                }
+            });
+            
+            showSuccess('role-success');
+            saveToLocalStorage();
+        }
+
+        // 复制角色信息
+        function copyRoles() {
+            const roleMap = {
+                '算法': 'algorithm-rtx',
+                '开发': 'dev-rtx',
+                '测试': 'test-rtx',
+                '交互': 'interaction-rtx',
+                '视觉': 'design-rtx'
+            };
+            
+            // 构建复制文本
+            const copyLines = [];
+            for (const [role, elementId] of Object.entries(roleMap)) {
+                const value = document.getElementById(elementId).value;
+                if (value) {
+                    copyLines.push(`${role}：${value}`);
+                }
+            }
+            
+            const copyText = copyLines.join('\n');
+            navigator.clipboard.writeText(copyText).then(() => {
+                showSuccess('role-success');
+                saveToLocalStorage();
+                saveToHistory('role', copyText);
+            });
+        }
+
+        // 添加显示历史记录的函数
+        function showHistory(type) {
+            try {
+                const history = JSON.parse(localStorage.getItem('mfHelperHistory') || '{}');
+                const records = history[type] || [];
+                
+                if (records.length === 0) {
+                    alert('暂无历史记录');
+                    return;
+                }
+                
+                const historyText = records.map(record => 
+                    `时间：${record.timestamp}\n${record.content}\n${'-'.repeat(50)}`
+                ).join('\n');
+                
+                // 创建模态框背景
+                const modalBackground = document.createElement('div');
+                modalBackground.className = 'history-modal';
+                
+                // 创建模态框内容
+                const modalContent = document.createElement('div');
+                modalContent.className = 'history-content';
+                
+                modalContent.innerHTML = `
+                    <h3 style="margin-top: 0; color: #1d1d1f; font-weight: 500;">历史记录</h3>
+                    <pre style="white-space: pre-wrap; font-size: 14px; line-height: 1.5;">${historyText}</pre>
+                    <button onclick="this.closest('.history-modal').remove()" style="
+                        margin-top: 20px;
+                        padding: 10px 20px;
+                        background: #007AFF;
+                        color: white;
+                        border: none;
+                        border-radius: 8px;
+                        cursor: pointer;
+                        font-size: 14px;
+                        font-weight: 500;
+                        transition: all 0.2s ease;
+                    ">关闭</button>
+                `;
+                
+                modalBackground.appendChild(modalContent);
+                document.body.appendChild(modalBackground);
+                
+                // 点击背景关闭模态框
+                modalBackground.addEventListener('click', (e) => {
+                    if (e.target === modalBackground) {
+                        modalBackground.remove();
+                    }
+                });
+            } catch (e) {
+                console.error('显示历史记录失败:', e);
+                alert('显示历史记录失败');
+            }
+        }
+
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 显示默认标签页
+            showTab('feature');
+            
+            // 加载保存的数据
+            loadFromLocalStorage();
+            
+            // 确保显示正确的实验相关字段
+            toggleExpFields();
+        });
+    </script>
+</body>
+</html> 
